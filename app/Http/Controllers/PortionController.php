@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Services\PortionService;
 use App\Services\AiFoodLookupService;
+use App\Http\Requests\QuickAddPortionRequest;
+use App\Http\Requests\StorePortionRequest;
 
 class PortionController extends Controller
 {
@@ -13,17 +15,9 @@ class PortionController extends Controller
         protected AiFoodLookupService $aiFoodLookupService
     ) {}
 
-    public function quickAdd(Request $request)
+    public function quickAdd(QuickAddPortionRequest $request)
     {
-        $validated = $request->validate([
-            'slug_grams' => 'required|string',
-        ]);
-
-        $input = $validated['slug_grams'];
-
-        if (!$this->portionService->isValidSlugGramsFormat($input)) {
-            return back()->withErrors(['slug_grams' => 'Invalid format. Use: slug-grams (e.g., chicken_breast-150)']);
-        }
+        $input = $request->validated()['quick_add'];
 
         $parts = explode('-', $input);
         $slug = $parts[0];
@@ -32,13 +26,13 @@ class PortionController extends Controller
         $result = $this->aiFoodLookupService->findOrCreateFood($slug, $request->user()->id);
 
         if (!$result) {
-            return back()->withErrors(['slug_grams' => 'Could not find or create food. Please try again.']);
+            return back()->withErrors(['quick_add' => 'Could not find or create food. Please try again.']);
         }
 
         $portion = $this->portionService->createPortion($request->user()->id, $result['food']->id, $grams);
 
         if (!$portion) {
-            return back()->withErrors(['slug_grams' => 'You do not have access to this food.']);
+            return back()->withErrors(['quick_add' => 'You do not have access to this food.']);
         }
 
         $message = $result['source'] === 'ai' 
@@ -48,12 +42,9 @@ class PortionController extends Controller
         return back()->with('success', $message);
     }
 
-    public function add(Request $request)
+    public function add(StorePortionRequest $request)
     {
-        $validated = $request->validate([
-            'food_id' => 'required|exists:foods,id',
-            'grams' => 'required|numeric|min:0.01',
-        ]);
+        $validated = $request->validated();
 
         $portion = $this->portionService->createPortion(
             $request->user()->id,

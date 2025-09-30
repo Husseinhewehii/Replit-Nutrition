@@ -13,6 +13,11 @@
             <input type="text" id="name" name="name" value="{{ old('name') }}" required>
         </div>
         <div class="form-group">
+            <label for="slug">Slug (auto-generated if empty)</label>
+            <input type="text" id="slug" name="slug" value="{{ old('slug') }}" pattern="[a-z0-9_]+" placeholder="e.g., chicken_breast">
+            <small style="color: #666;">Lowercase letters, numbers, and underscores only. Leave empty to auto-generate.</small>
+        </div>
+        <div class="form-group">
             <label for="kcal_per_100g">Calories per 100g</label>
             <input type="number" step="0.01" id="kcal_per_100g" name="kcal_per_100g" value="{{ old('kcal_per_100g') }}" required>
         </div>

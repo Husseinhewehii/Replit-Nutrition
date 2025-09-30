@@ -14,6 +14,11 @@
             <input type="text" id="name" name="name" value="{{ old('name', $food->name) }}" required>
         </div>
         <div class="form-group">
+            <label for="slug">Slug</label>
+            <input type="text" id="slug" name="slug" value="{{ old('slug', $food->slug) }}" pattern="[a-z0-9_]+" placeholder="e.g., chicken_breast" required>
+            <small style="color: #666;">Lowercase letters, numbers, and underscores only.</small>
+        </div>
+        <div class="form-group">
             <label for="kcal_per_100g">Calories per 100g</label>
             <input type="number" step="0.01" id="kcal_per_100g" name="kcal_per_100g" value="{{ old('kcal_per_100g', $food->kcal_per_100g) }}" required>
         </div>

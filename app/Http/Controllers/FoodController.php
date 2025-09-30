@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Services\FoodService;
 use App\Models\Food;
+use App\Http\Requests\StoreFoodRequest;
+use App\Http\Requests\UpdateFoodRequest;
 
 class FoodController extends Controller
 {
@@ -28,15 +30,9 @@ class FoodController extends Controller
         return view('foods.create');
     }
 
-    public function store(Request $request)
+    public function store(StoreFoodRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'kcal_per_100g' => 'required|numeric|min:0',
-            'protein_per_100g' => 'required|numeric|min:0',
-            'carbs_per_100g' => 'required|numeric|min:0',
-            'fat_per_100g' => 'required|numeric|min:0',
-        ]);
+        $validated = $request->validated();
 
         $this->foodService->createFood($validated, $request->user()->id);
 
@@ -49,17 +45,9 @@ class FoodController extends Controller
         return view('foods.edit', ['food' => $food]);
     }
 
-    public function update(Request $request, Food $food)
+    public function update(UpdateFoodRequest $request, Food $food)
     {
-        $this->authorize('update', $food);
-        
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'kcal_per_100g' => 'required|numeric|min:0',
-            'protein_per_100g' => 'required|numeric|min:0',
-            'carbs_per_100g' => 'required|numeric|min:0',
-            'fat_per_100g' => 'required|numeric|min:0',
-        ]);
+        $validated = $request->validated();
 
         $this->foodService->updateFood($food, $validated);
 

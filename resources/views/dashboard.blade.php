@@ -29,7 +29,7 @@
     <p>Enter food slug and grams: e.g., <code>chicken_breast-150</code></p>
     <form action="{{ route('portions.quick-add') }}" method="POST" class="quick-add-form">
         @csrf
-        <input type="text" name="slug_grams" placeholder="chicken_breast-150" required>
+        <input type="text" name="quick_add" placeholder="chicken_breast-150" required>
         <button type="submit">Add</button>
     </form>
 </div>
