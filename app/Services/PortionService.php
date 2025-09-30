@@ -14,8 +14,18 @@ class PortionService
         protected FoodRepository $foodRepository
     ) {}
 
-    public function createPortion(int $userId, int $foodId, float $grams, ?string $date = null): Portion
+    public function createPortion(int $userId, int $foodId, float $grams, ?string $date = null): ?Portion
     {
+        $food = $this->foodRepository->findById($foodId);
+        
+        if (!$food) {
+            return null;
+        }
+        
+        if (!$food->is_global && $food->user_id !== $userId) {
+            return null;
+        }
+        
         return $this->portionRepository->create([
             'user_id' => $userId,
             'food_id' => $foodId,

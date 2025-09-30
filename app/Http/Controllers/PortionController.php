@@ -35,7 +35,11 @@ class PortionController extends Controller
             return back()->withErrors(['slug_grams' => 'Could not find or create food. Please try again.']);
         }
 
-        $this->portionService->createPortion($request->user()->id, $result['food']->id, $grams);
+        $portion = $this->portionService->createPortion($request->user()->id, $result['food']->id, $grams);
+
+        if (!$portion) {
+            return back()->withErrors(['slug_grams' => 'You do not have access to this food.']);
+        }
 
         $message = $result['source'] === 'ai' 
             ? "Portion added! Food '{$result['food']->name}' was automatically created with AI."
@@ -51,11 +55,15 @@ class PortionController extends Controller
             'grams' => 'required|numeric|min:0.01',
         ]);
 
-        $this->portionService->createPortion(
+        $portion = $this->portionService->createPortion(
             $request->user()->id,
             $validated['food_id'],
             $validated['grams']
         );
+
+        if (!$portion) {
+            return back()->withErrors(['food_id' => 'You do not have access to this food.']);
+        }
 
         return back()->with('success', 'Portion added successfully!');
     }

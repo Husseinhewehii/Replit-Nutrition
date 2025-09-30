@@ -23,10 +23,14 @@ class AiFoodLookupService
             ];
         }
 
+        if (!$userId) {
+            return null;
+        }
+
         $aiFood = $this->lookupFoodWithAi($slug);
         
         if ($aiFood) {
-            $createdFood = $this->foodService->createGlobalFood($aiFood);
+            $createdFood = $this->foodService->createFood($aiFood, $userId);
             return [
                 'food' => $createdFood,
                 'source' => 'ai'

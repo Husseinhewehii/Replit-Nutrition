@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Services\FoodService;
 use App\Models\Food;
@@ -14,18 +15,8 @@ class FoodController extends Controller
 
     public function index(Request $request)
     {
-        $userFoods = $this->foodService->getUserFoods($request->user()->id);
-        $globalFoods = $this->foodService->getGlobalFoods();
-
-        return view('foods.index', [
-            'userFoods' => $userFoods,
-            'globalFoods' => $globalFoods,
-        ]);
-    }
-
-    public function create()
-    {
-        return view('foods.create');
+        $foods = $this->foodService->getAllAccessibleFoods($request->user()?->id);
+        return response()->json($foods);
     }
 
     public function store(Request $request)
@@ -38,15 +29,15 @@ class FoodController extends Controller
             'fat_per_100g' => 'required|numeric|min:0',
         ]);
 
-        $this->foodService->createFood($validated, $request->user()->id);
+        $food = $this->foodService->createFood($validated, $request->user()->id);
 
-        return redirect()->route('foods.index')->with('success', 'Food created successfully!');
+        return response()->json($food, 201);
     }
 
-    public function edit(Food $food)
+    public function show(Food $food)
     {
-        $this->authorize('update', $food);
-        return view('foods.edit', ['food' => $food]);
+        $this->authorize('view', $food);
+        return response()->json($food);
     }
 
     public function update(Request $request, Food $food)
@@ -63,7 +54,7 @@ class FoodController extends Controller
 
         $this->foodService->updateFood($food, $validated);
 
-        return redirect()->route('foods.index')->with('success', 'Food updated successfully!');
+        return response()->json($food);
     }
 
     public function destroy(Food $food)
@@ -71,6 +62,6 @@ class FoodController extends Controller
         $this->authorize('delete', $food);
         $this->foodService->deleteFood($food);
 
-        return redirect()->route('foods.index')->with('success', 'Food deleted successfully!');
+        return response()->json(['message' => 'Food deleted successfully']);
     }
 }
