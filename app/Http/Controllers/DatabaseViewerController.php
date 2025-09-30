@@ -7,11 +7,6 @@ use Illuminate\Support\Facades\Schema;
 
 class DatabaseViewerController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
-
     public function index()
     {
         $tables = $this->getTables();
