@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FoodController;
 use App\Http\Controllers\PortionController;
+use App\Http\Controllers\DatabaseViewerController;
 
 Route::get('/', function () {
     return redirect('/login');
@@ -34,4 +35,6 @@ Route::middleware('auth')->group(function () {
     Route::delete('/foods/{food}', [FoodController::class, 'destroy'])->name('foods.destroy');
     
     Route::get('/entries', [PortionController::class, 'index'])->name('entries.index');
+    
+    Route::get('/database-viewer', [DatabaseViewerController::class, 'index'])->name('database.viewer');
 });
