@@ -25,7 +25,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/portions/quick-add', [PortionController::class, 'quickAdd'])->name('portions.quick-add');
     Route::post('/portions/add', [PortionController::class, 'add'])->name('portions.add');
     
-    Route::get('/foods', [FoodController::class, 'index'])->name('foods.index');
+    Route::get('/foods', [FoodController::class, 'index'])->name('foods');
     Route::get('/foods/create', [FoodController::class, 'create'])->name('foods.create');
     Route::post('/foods', [FoodController::class, 'store'])->name('foods.store');
     Route::get('/foods/{food}', [FoodController::class, 'show'])->name('foods.show');
