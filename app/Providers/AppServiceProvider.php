@@ -22,7 +22,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // Force HTTPS in production and on Replit
-        if (config('app.env') !== 'testing') {
+        if (config('app.env') !== 'testing' || env('FORCE_HTTPS', true)) {
             URL::forceScheme('https');
         }
 
