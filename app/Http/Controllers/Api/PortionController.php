@@ -58,7 +58,7 @@ class PortionController extends Controller
         $this->authorize('delete', $portion);
         $this->portionService->deletePortion($portion);
 
-        return response()->json(['message' => 'Portion deleted successfully']);
+        return response()->noContent();
     }
 
     public function quickAdd(Request $request)

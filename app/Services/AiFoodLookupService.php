@@ -83,7 +83,10 @@ class AiFoodLookupService
             ];
 
         } catch (\Exception $e) {
-            dd($e->getMessage());
+            \Log::error('AI Food Lookup failed', [
+                'slug' => $slug,
+                'error' => $e->getMessage()
+            ]);
             return null;
         }
     }

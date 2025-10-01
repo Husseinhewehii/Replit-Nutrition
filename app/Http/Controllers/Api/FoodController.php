@@ -62,6 +62,6 @@ class FoodController extends Controller
         $this->authorize('delete', $food);
         $this->foodService->deleteFood($food);
 
-        return response()->json(['message' => 'Food deleted successfully']);
+        return response()->noContent();
     }
 }
