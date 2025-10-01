@@ -12,6 +12,7 @@ class Food extends Model
 
     protected $fillable = [
         'user_id',
+    'food_id',
         'name',
         'slug',
         'kcal_per_100g',

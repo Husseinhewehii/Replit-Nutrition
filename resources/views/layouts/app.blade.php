@@ -13,7 +13,7 @@
         <div class="container">
             <div>
                 <a href="{{ route('dashboard') }}">Dashboard</a>
-                <a href="{{ route('foods') }}">Foods</a>
+                <a href="{{ route('foods.index') }}">Foods</a>
                 <a href="{{ route('entries.index') }}">Entries</a>
             </div>
             <div>

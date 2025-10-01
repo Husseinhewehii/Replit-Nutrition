@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('portions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('food_id')->constrained()->onDelete('cascade');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('food_id')->constrained('foods')->onDelete('cascade');
             $table->decimal('grams', 8, 2);
             $table->date('consumed_at');
             $table->timestamps();
