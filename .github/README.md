@@ -4,12 +4,10 @@ This directory contains GitHub Actions workflows for the Laravel Nutrition app.
 
 ## Available Workflows
 
-### Laravel CI - Merge Gate (`laravel.yml`)
-**Comprehensive workflow that serves as a merge gate:**
-- ✅ PHPUnit tests with MySQL + Redis
-- ✅ Cypress E2E tests
-- ✅ Security audit (Composer)
-- ✅ Code style check (PHP CS Fixer)
+### Laravel CI - MVP (`laravel.yml`)
+**Simple workflow that serves as a merge gate:**
+- ✅ PHPUnit tests with SQLite
+- ✅ Frontend build test
 - ✅ Application startup test
 
 **Triggers:** Push/PR to main/master branches
@@ -20,10 +18,9 @@ This directory contains GitHub Actions workflows for the Laravel Nutrition app.
 No secrets are required! The workflow uses mocked OpenAI services for testing.
 
 ### 2. Database Setup
-The workflows automatically set up:
-- MySQL 8.0 database
-- Redis cache (in full CI pipeline)
-- Test database with seeded data
+The workflow uses:
+- SQLite in-memory database (fast and simple)
+- No external database services needed
 
 ### 3. Environment Configuration
 The workflows use the `docker-env-example.txt` file as a template for environment variables.
