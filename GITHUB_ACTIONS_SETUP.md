@@ -8,7 +8,7 @@ I've created a comprehensive GitHub Actions workflow to serve as a merge gate fo
 **`.github/workflows/laravel.yml`** - **Laravel CI - Merge Gate**
 - Complete CI/CD pipeline in one file
 - Serves as a gate before merging
-- Includes: Tests, E2E tests, Security checks, Docker Compose test
+- Includes: Tests, E2E tests, Security checks
 
 ### Documentation
 - **`.github/README.md`** - Detailed workflow documentation
@@ -16,12 +16,7 @@ I've created a comprehensive GitHub Actions workflow to serve as a merge gate fo
 
 ## 🚀 Quick Setup
 
-### 1. Add Required Secret
-1. Go to your GitHub repository
-2. Settings → Secrets and variables → Actions
-3. Add secret: `OPENAI_API_KEY` with your actual API key
-
-### 2. Push to GitHub
+### 1. Push to GitHub
 ```bash
 git add .github/
 git commit -m "Add Laravel CI merge gate workflow"
@@ -43,11 +38,6 @@ git push
 ### Security Job
 - ✅ **Security Audit**: Composer vulnerability check
 - ✅ **Code Style**: PHP CS Fixer validation
-
-### Docker Compose Job
-- ✅ **Docker Compose**: Tests with your actual docker-compose setup
-- ✅ **Real Environment**: Uses your existing Docker configuration
-- ✅ **Integration Test**: Full stack test with containers
 
 ## 🎯 Your Requirements Met
 
@@ -107,8 +97,7 @@ composer audit
 
 ## 📝 Next Steps
 
-1. **Add the OpenAI secret** to GitHub
-2. **Push to GitHub** to trigger the workflow
-3. **Check the Actions tab** to see results
+1. **Push to GitHub** to trigger the workflow
+2. **Check the Actions tab** to see results
 
 The workflow will run automatically on every push and pull request to your main/master branch, serving as a merge gate!

@@ -10,7 +10,6 @@ This directory contains GitHub Actions workflows for the Laravel Nutrition app.
 - ✅ Cypress E2E tests
 - ✅ Security audit (Composer)
 - ✅ Code style check (PHP CS Fixer)
-- ✅ Docker Compose integration test
 - ✅ Application startup test
 
 **Triggers:** Push/PR to main/master branches
@@ -18,11 +17,7 @@ This directory contains GitHub Actions workflows for the Laravel Nutrition app.
 ## Setup Instructions
 
 ### 1. Required Secrets
-Add these secrets to your GitHub repository:
-
-1. Go to your repository → Settings → Secrets and variables → Actions
-2. Add the following secret:
-   - `OPENAI_API_KEY`: Your OpenAI API key (for AI features testing)
+No secrets are required! The workflow uses mocked OpenAI services for testing.
 
 ### 2. Database Setup
 The workflows automatically set up:
@@ -40,7 +35,7 @@ The workflows use the `docker-env-example.txt` file as a template for environmen
 # Runs on: ubuntu-latest
 # Services: MySQL 8.0
 # Steps:
-1. Setup PHP 8.2 + Node.js 18
+1. Setup PHP 8.4 + Node.js 18
 2. Install dependencies
 3. Setup database
 4. Run tests
