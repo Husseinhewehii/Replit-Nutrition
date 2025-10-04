@@ -4,24 +4,16 @@ This directory contains GitHub Actions workflows for the Laravel Nutrition app.
 
 ## Available Workflows
 
-### 1. Basic Project Check (`basic-check.yml`)
-**Simple workflow that checks:**
-- ✅ Project builds successfully
-- ✅ All tests pass
-- ✅ Application starts and responds
-
-**Triggers:** Push/PR to main/master branches
-
-### 2. Full CI/CD Pipeline (`ci.yml`)
-**Comprehensive workflow that includes:**
-- ✅ PHPUnit tests
+### Laravel CI - Merge Gate (`laravel.yml`)
+**Comprehensive workflow that serves as a merge gate:**
+- ✅ PHPUnit tests with MySQL + Redis
 - ✅ Cypress E2E tests
-- ✅ Security audit
-- ✅ Code style check
-- ✅ Docker build test
+- ✅ Security audit (Composer)
+- ✅ Code style check (PHP CS Fixer)
+- ✅ Docker Compose integration test
 - ✅ Application startup test
 
-**Triggers:** Push/PR to main/master/develop branches
+**Triggers:** Push/PR to main/master branches
 
 ## Setup Instructions
 
