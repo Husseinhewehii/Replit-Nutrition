@@ -5,10 +5,10 @@ I've created a comprehensive GitHub Actions workflow to serve as a merge gate fo
 ## 📁 Files Created
 
 ### Workflow File
-**`.github/workflows/laravel.yml`** - **Laravel CI - Merge Gate**
-- Complete CI/CD pipeline in one file
+**`.github/workflows/laravel.yml`** - **Laravel CI - MVP**
+- Simple CI pipeline in one file
 - Serves as a gate before merging
-- Includes: Tests, E2E tests, Security checks
+- Includes: Tests, Build, App startup check
 
 ### Documentation
 - **`.github/README.md`** - Detailed workflow documentation
@@ -23,26 +23,18 @@ git commit -m "Add Laravel CI merge gate workflow"
 git push
 ```
 
-## ✅ What the Laravel CI Workflow Checks
+## ✅ What the Laravel CI MVP Checks
 
-### Test Job
-- ✅ **Tests Pass**: Runs `php artisan test` with MySQL + Redis
+### Single Test Job
+- ✅ **Tests Pass**: Runs `php artisan test` with SQLite
+- ✅ **Build Success**: Frontend assets build correctly
 - ✅ **App Starts**: Starts server and checks HTTP response
-- ✅ **Database**: Full MySQL setup with migrations and seeders
-
-### Cypress E2E Job
-- ✅ **E2E Tests**: Runs Cypress tests in browser
-- ✅ **Visual Testing**: Screenshots and videos on failure
-- ✅ **Real Environment**: Full MySQL + Redis setup
-
-### Security Job
-- ✅ **Security Audit**: Composer vulnerability check
-- ✅ **Code Style**: PHP CS Fixer validation
+- ✅ **Fast**: Uses SQLite in-memory database (no external services)
 
 ## 🎯 Your Requirements Met
 
-✅ **Project is running**: Tests application startup with docker-compose
-✅ **Tests are passing**: Runs full test suite (PHPUnit + Cypress)
+✅ **Project is running**: Tests application startup
+✅ **Tests are passing**: Runs PHPUnit test suite
 ✅ **Merge Gate**: Serves as a gate before merging to main/master
 
 ## 🔧 Customization
@@ -62,11 +54,8 @@ git push
 ### Success ✅
 ```
 ✅ Tests Pass: 112 tests, 311 assertions
-✅ App Starts: HTTP 200 response with docker-compose
-✅ E2E Tests: Cypress tests pass
-✅ Security: No vulnerabilities found
-✅ Code Style: PHP CS Fixer passes
-✅ Docker Compose: Full stack integration test passes
+✅ Build Success: Frontend assets built
+✅ App Starts: HTTP 200 response
 ```
 
 ### Failure ❌
@@ -82,17 +71,12 @@ Test the same checks locally:
 # Run tests
 docker compose exec app php artisan test
 
-# Run Cypress tests
-npm run cypress:run
+# Build frontend
+npm run build
 
 # Test app startup
-docker compose up -d
-curl http://localhost:8001
-docker compose down
-
-# Security check
-composer audit
-./vendor/bin/pint --test
+docker compose exec app php artisan serve &
+curl http://localhost:8000
 ```
 
 ## 📝 Next Steps

@@ -5,10 +5,11 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
+  workflow_dispatch: # Allow manual runs
 
 jobs:
   test:
-    name: Test & Deploy Check
+    name: Laravel CI Check
     runs-on: ubuntu-latest
     
     steps:
