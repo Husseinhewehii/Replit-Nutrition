@@ -1,0 +1,54 @@
+{
+  "user": {
+    "email": "test@example.com",
+    "password": "password",
+    "name": "Test User"
+  },
+  "foods": [
+    {
+      "name": "Apple",
+      "kcal_per_100g": 52,
+      "protein_per_100g": 0.3,
+      "carbs_per_100g": 14,
+      "fat_per_100g": 0.2
+    },
+    {
+      "name": "Banana",
+      "kcal_per_100g": 89,
+      "protein_per_100g": 1.1,
+      "carbs_per_100g": 23,
+      "fat_per_100g": 0.3
+    },
+    {
+      "name": "Chicken Breast",
+      "kcal_per_100g": 165,
+      "protein_per_100g": 31,
+      "carbs_per_100g": 0,
+      "fat_per_100g": 3.6
+    }
+  ],
+  "portions": [
+    {
+      "food_name": "Apple",
+      "grams": 150,
+      "consumed_at": "today"
+    },
+    {
+      "food_name": "Banana",
+      "grams": 120,
+      "consumed_at": "today"
+    },
+    {
+      "food_name": "Chicken Breast",
+      "grams": 200,
+      "consumed_at": "yesterday"
+    },
+    {
+      "food_name": "Apple",
+      "grams": 100,
+      "consumed_at": "yesterday"
+    }
+  ]
+}
+
+

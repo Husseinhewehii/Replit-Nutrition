@@ -1,0 +1,47 @@
+.day-header {
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none;
+    transition: background-color 0.2s ease;
+    padding: 1rem;
+    margin: -1rem -1rem 0 -1rem;
+    border-radius: 8px 8px 0 0;
+}
+
+.day-header:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.toggle-icon {
+    font-size: 0.8em;
+    color: #666;
+    transition: transform 0.2s ease;
+}
+
+.day-content {
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.day-content.collapsed {
+    max-height: 0;
+    opacity: 0;
+    margin: 0;
+    padding: 0;
+}
+
+.current-day {
+    background-color: #f0f8ff;
+    border: 2px solid #4a90e2;
+}
+
+.current-day .day-header {
+    color: #2c5aa0;
+    font-weight: 600;
+}
+
+.current-day .toggle-icon {
+    color: #2c5aa0;
+}
