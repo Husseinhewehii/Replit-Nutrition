@@ -7,7 +7,6 @@ use App\Services\DailyTotalsService;
 use App\Repositories\PortionRepository;
 use App\Models\Portion;
 use App\Models\Food;
-use Mockery;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 
@@ -21,16 +20,16 @@ class DailyTotalsServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->portionRepository = Mockery::mock(PortionRepository::class);
+        $this->portionRepository = $this->createMock(PortionRepository::class);
         $this->dailyTotalsService = new DailyTotalsService($this->portionRepository);
     }
 
     public function test_calculate_daily_totals_with_no_portions()
     {
-        $this->portionRepository->shouldReceive('getUserPortionsByDate')
+        $this->portionRepository->expects($this->once())
+            ->method('getUserPortionsByDate')
             ->with(1, '2025-10-01')
-            ->once()
-            ->andReturn(new \Illuminate\Database\Eloquent\Collection([]));
+            ->willReturn(new \Illuminate\Database\Eloquent\Collection([]));
 
         $result = $this->dailyTotalsService->calculateDailyTotals(1, '2025-10-01');
 
@@ -64,10 +63,10 @@ class DailyTotalsServiceTest extends TestCase
         $portion2 = new Portion(['grams' => 200]);
         $portion2->setRelation('food', $food2);
 
-        $this->portionRepository->shouldReceive('getUserPortionsByDate')
+        $this->portionRepository->expects($this->once())
+            ->method('getUserPortionsByDate')
             ->with(1, '2025-10-01')
-            ->once()
-            ->andReturn(new \Illuminate\Database\Eloquent\Collection([$portion1, $portion2]));
+            ->willReturn(new \Illuminate\Database\Eloquent\Collection([$portion1, $portion2]));
 
         $result = $this->dailyTotalsService->calculateDailyTotals(1, '2025-10-01');
 
@@ -83,10 +82,10 @@ class DailyTotalsServiceTest extends TestCase
     {
         Carbon::setTestNow('2025-10-01');
 
-        $this->portionRepository->shouldReceive('getUserPortionsByDate')
+        $this->portionRepository->expects($this->once())
+            ->method('getUserPortionsByDate')
             ->with(1, '2025-10-01')
-            ->once()
-            ->andReturn(new \Illuminate\Database\Eloquent\Collection([]));
+            ->willReturn(new \Illuminate\Database\Eloquent\Collection([]));
 
         $result = $this->dailyTotalsService->getTodayTotals(1);
 
@@ -112,10 +111,10 @@ class DailyTotalsServiceTest extends TestCase
         $portion = new Portion(['grams' => 75]);
         $portion->setRelation('food', $food);
 
-        $this->portionRepository->shouldReceive('getUserPortionsByDate')
+        $this->portionRepository->expects($this->once())
+            ->method('getUserPortionsByDate')
             ->with(1, '2025-10-01')
-            ->once()
-            ->andReturn(new \Illuminate\Database\Eloquent\Collection([$portion]));
+            ->willReturn(new \Illuminate\Database\Eloquent\Collection([$portion]));
 
         $result = $this->dailyTotalsService->calculateDailyTotals(1, '2025-10-01');
 
@@ -127,7 +126,6 @@ class DailyTotalsServiceTest extends TestCase
 
     protected function tearDown(): void
     {
-        Mockery::close();
         parent::tearDown();
     }
 }

@@ -29,6 +29,11 @@ class PortionController extends Controller
             return back()->withErrors(['quick_add' => 'Could not find or create food. Please try again.']);
         }
 
+        // Handle AI failure case
+        if (isset($result['error_type']) && $result['error_type'] === 'ai_failure') {
+            return back()->withErrors(['quick_add' => 'Unable to find nutrition information for this food. Please try adding it manually.']);
+        }
+
         $portion = $this->portionService->createPortion($request->user()->id, $result['food']->id, $grams);
 
         if (!$portion) {

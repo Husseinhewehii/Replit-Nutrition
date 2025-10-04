@@ -8,7 +8,6 @@ use App\Repositories\PortionRepository;
 use App\Repositories\FoodRepository;
 use App\Models\Portion;
 use App\Models\Food;
-use Mockery;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 
@@ -23,8 +22,8 @@ class PortionServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->portionRepository = Mockery::mock(PortionRepository::class);
-        $this->foodRepository = Mockery::mock(FoodRepository::class);
+        $this->portionRepository = $this->createMock(PortionRepository::class);
+        $this->foodRepository = $this->createMock(FoodRepository::class);
         $this->portionService = new PortionService($this->portionRepository, $this->foodRepository);
     }
 
@@ -37,10 +36,10 @@ class PortionServiceTest extends TestCase
             'user_id' => null,
         ]);
 
-        $this->foodRepository->shouldReceive('findById')
+        $this->foodRepository->expects($this->once())
+            ->method('findById')
             ->with(1)
-            ->once()
-            ->andReturn($food);
+            ->willReturn($food);
 
         $expectedData = [
             'user_id' => 1,
@@ -51,10 +50,10 @@ class PortionServiceTest extends TestCase
 
         $portion = new Portion($expectedData);
 
-        $this->portionRepository->shouldReceive('create')
+        $this->portionRepository->expects($this->once())
+            ->method('create')
             ->with($expectedData)
-            ->once()
-            ->andReturn($portion);
+            ->willReturn($portion);
 
         $result = $this->portionService->createPortion(1, 1, 150);
 
@@ -70,10 +69,10 @@ class PortionServiceTest extends TestCase
             'user_id' => 1,
         ]);
 
-        $this->foodRepository->shouldReceive('findById')
+        $this->foodRepository->expects($this->once())
+            ->method('findById')
             ->with(1)
-            ->once()
-            ->andReturn($food);
+            ->willReturn($food);
 
         $expectedData = [
             'user_id' => 1,
@@ -84,10 +83,10 @@ class PortionServiceTest extends TestCase
 
         $portion = new Portion($expectedData);
 
-        $this->portionRepository->shouldReceive('create')
+        $this->portionRepository->expects($this->once())
+            ->method('create')
             ->with($expectedData)
-            ->once()
-            ->andReturn($portion);
+            ->willReturn($portion);
 
         $result = $this->portionService->createPortion(1, 1, 100);
 
@@ -96,10 +95,10 @@ class PortionServiceTest extends TestCase
 
     public function test_create_portion_returns_null_when_food_not_found()
     {
-        $this->foodRepository->shouldReceive('findById')
+        $this->foodRepository->expects($this->once())
+            ->method('findById')
             ->with(999)
-            ->once()
-            ->andReturn(null);
+            ->willReturn(null);
 
         $result = $this->portionService->createPortion(1, 999, 100);
 
@@ -115,10 +114,10 @@ class PortionServiceTest extends TestCase
             'user_id' => 2,
         ]);
 
-        $this->foodRepository->shouldReceive('findById')
+        $this->foodRepository->expects($this->once())
+            ->method('findById')
             ->with(1)
-            ->once()
-            ->andReturn($food);
+            ->willReturn($food);
 
         $result = $this->portionService->createPortion(1, 1, 100);
 
@@ -151,15 +150,15 @@ class PortionServiceTest extends TestCase
         ]);
         $food->id = 1;
 
-        $this->foodRepository->shouldReceive('findBySlug')
+        $this->foodRepository->expects($this->once())
+            ->method('findBySlug')
             ->with('chicken_breast', 1)
-            ->once()
-            ->andReturn($food);
+            ->willReturn($food);
 
-        $this->foodRepository->shouldReceive('findById')
+        $this->foodRepository->expects($this->once())
+            ->method('findById')
             ->with(1)
-            ->once()
-            ->andReturn($food);
+            ->willReturn($food);
 
         $expectedData = [
             'user_id' => 1,
@@ -170,10 +169,10 @@ class PortionServiceTest extends TestCase
 
         $portion = new Portion($expectedData);
 
-        $this->portionRepository->shouldReceive('create')
+        $this->portionRepository->expects($this->once())
+            ->method('create')
             ->with($expectedData)
-            ->once()
-            ->andReturn($portion);
+            ->willReturn($portion);
 
         $result = $this->portionService->createPortionFromSlugGrams(1, 'chicken_breast-150');
 
@@ -182,10 +181,10 @@ class PortionServiceTest extends TestCase
 
     public function test_create_portion_from_slug_grams_returns_null_when_food_not_found()
     {
-        $this->foodRepository->shouldReceive('findBySlug')
+        $this->foodRepository->expects($this->once())
+            ->method('findBySlug')
             ->with('unknown_food', 1)
-            ->once()
-            ->andReturn(null);
+            ->willReturn(null);
 
         $result = $this->portionService->createPortionFromSlugGrams(1, 'unknown_food-100');
 
@@ -196,10 +195,10 @@ class PortionServiceTest extends TestCase
     {
         $portion = new Portion(['id' => 1]);
 
-        $this->portionRepository->shouldReceive('delete')
+        $this->portionRepository->expects($this->once())
+            ->method('delete')
             ->with($portion)
-            ->once()
-            ->andReturn(true);
+            ->willReturn(true);
 
         $result = $this->portionService->deletePortion($portion);
 
@@ -208,7 +207,6 @@ class PortionServiceTest extends TestCase
 
     protected function tearDown(): void
     {
-        Mockery::close();
         parent::tearDown();
     }
 }

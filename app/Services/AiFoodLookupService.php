@@ -27,13 +27,21 @@ class AiFoodLookupService
             return null;
         }
 
-        $aiFood = $this->lookupFoodWithAi($slug);
+        $aiResult = $this->lookupFoodWithAi($slug);
         
-        if ($aiFood) {
-            $createdFood = $this->foodService->createFood($aiFood, $userId);
+        if ($aiResult && isset($aiResult['food'])) {
+            $createdFood = $this->foodService->createFood($aiResult['food'], $userId);
             return [
                 'food' => $createdFood,
                 'source' => 'ai'
+            ];
+        }
+
+        // Return error information if AI failed
+        if ($aiResult && isset($aiResult['error'])) {
+            return [
+                'error' => $aiResult['error'],
+                'error_type' => 'ai_failure'
             ];
         }
 
@@ -70,24 +78,35 @@ class AiFoodLookupService
             $nutritionData = json_decode($content, true);
 
             if (!$nutritionData || !isset($nutritionData['kcal_per_100g'])) {
-                return null;
+                \Log::error('AI Food Lookup failed - Invalid response format', [
+                    'slug' => $slug,
+                    'response_content' => $content
+                ]);
+                return [
+                    'error' => 'AI was unable to provide valid nutrition data for this food item.'
+                ];
             }
 
             return [
-                'name' => $nutritionData['name'] ?? $foodName,
-                'slug' => $slug,
-                'kcal_per_100g' => $nutritionData['kcal_per_100g'],
-                'protein_per_100g' => $nutritionData['protein_per_100g'],
-                'carbs_per_100g' => $nutritionData['carbs_per_100g'],
-                'fat_per_100g' => $nutritionData['fat_per_100g'],
+                'food' => [
+                    'name' => $nutritionData['name'] ?? $foodName,
+                    'slug' => $slug,
+                    'kcal_per_100g' => $nutritionData['kcal_per_100g'],
+                    'protein_per_100g' => $nutritionData['protein_per_100g'],
+                    'carbs_per_100g' => $nutritionData['carbs_per_100g'],
+                    'fat_per_100g' => $nutritionData['fat_per_100g'],
+                ]
             ];
 
         } catch (\Exception $e) {
             \Log::error('AI Food Lookup failed', [
                 'slug' => $slug,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'exception_class' => get_class($e)
             ]);
-            return null;
+            return [
+                'error' => 'AI service is currently unavailable. Please try again later.'
+            ];
         }
     }
 }

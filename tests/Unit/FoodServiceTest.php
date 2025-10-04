@@ -6,7 +6,6 @@ use Tests\TestCase;
 use App\Services\FoodService;
 use App\Repositories\FoodRepository;
 use App\Models\Food;
-use Mockery;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 
 class FoodServiceTest extends TestCase
@@ -19,17 +18,17 @@ class FoodServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->foodRepository = Mockery::mock(FoodRepository::class);
+        $this->foodRepository = $this->createMock(FoodRepository::class);
         $this->foodService = new FoodService($this->foodRepository);
     }
 
     public function test_find_by_slug_returns_food()
     {
         $food = new Food(['id' => 1, 'slug' => 'chicken_breast', 'name' => 'Chicken Breast']);
-        $this->foodRepository->shouldReceive('findBySlug')
+        $this->foodRepository->expects($this->once())
+            ->method('findBySlug')
             ->with('chicken_breast', 1)
-            ->once()
-            ->andReturn($food);
+            ->willReturn($food);
 
         $result = $this->foodService->findBySlug('chicken_breast', 1);
 
@@ -39,10 +38,10 @@ class FoodServiceTest extends TestCase
     public function test_get_user_foods_returns_collection()
     {
         $foods = new \Illuminate\Database\Eloquent\Collection([new Food(['id' => 1, 'name' => 'Food 1'])]);
-        $this->foodRepository->shouldReceive('getUserFoods')
+        $this->foodRepository->expects($this->once())
+            ->method('getUserFoods')
             ->with(1)
-            ->once()
-            ->andReturn($foods);
+            ->willReturn($foods);
 
         $result = $this->foodService->getUserFoods(1);
 
@@ -52,9 +51,9 @@ class FoodServiceTest extends TestCase
     public function test_get_global_foods_returns_collection()
     {
         $foods = new \Illuminate\Database\Eloquent\Collection([new Food(['id' => 1, 'name' => 'Global Food', 'is_global' => true])]);
-        $this->foodRepository->shouldReceive('getGlobalFoods')
-            ->once()
-            ->andReturn($foods);
+        $this->foodRepository->expects($this->once())
+            ->method('getGlobalFoods')
+            ->willReturn($foods);
 
         $result = $this->foodService->getGlobalFoods();
 
@@ -74,10 +73,10 @@ class FoodServiceTest extends TestCase
         $expectedData = array_merge($data, ['slug' => 'chicken-breast', 'user_id' => 1]);
         $food = new Food($expectedData);
 
-        $this->foodRepository->shouldReceive('create')
+        $this->foodRepository->expects($this->once())
+            ->method('create')
             ->with($expectedData)
-            ->once()
-            ->andReturn($food);
+            ->willReturn($food);
 
         $result = $this->foodService->createFood($data, 1);
 
@@ -97,10 +96,10 @@ class FoodServiceTest extends TestCase
 
         $expectedData = array_merge($data, ['user_id' => 1]);
 
-        $this->foodRepository->shouldReceive('create')
+        $this->foodRepository->expects($this->once())
+            ->method('create')
             ->with($expectedData)
-            ->once()
-            ->andReturn(new Food($expectedData));
+            ->willReturn(new Food($expectedData));
 
         $result = $this->foodService->createFood($data, 1);
 
@@ -112,10 +111,10 @@ class FoodServiceTest extends TestCase
         $food = new Food(['id' => 1, 'name' => 'Old Name', 'slug' => 'old_name']);
         $data = ['name' => 'New Name'];
 
-        $this->foodRepository->shouldReceive('update')
+        $this->foodRepository->expects($this->once())
+            ->method('update')
             ->with($food, ['name' => 'New Name', 'slug' => 'new-name'])
-            ->once()
-            ->andReturn(true);
+            ->willReturn(true);
 
         $result = $this->foodService->updateFood($food, $data);
 
@@ -127,10 +126,10 @@ class FoodServiceTest extends TestCase
         $food = new Food(['id' => 1, 'name' => 'Old Name', 'slug' => 'old_name']);
         $data = ['name' => 'New Name', 'slug' => 'custom_slug'];
 
-        $this->foodRepository->shouldReceive('update')
+        $this->foodRepository->expects($this->once())
+            ->method('update')
             ->with($food, $data)
-            ->once()
-            ->andReturn(true);
+            ->willReturn(true);
 
         $result = $this->foodService->updateFood($food, $data);
 
@@ -141,10 +140,10 @@ class FoodServiceTest extends TestCase
     {
         $food = new Food(['id' => 1, 'name' => 'Food']);
 
-        $this->foodRepository->shouldReceive('delete')
+        $this->foodRepository->expects($this->once())
+            ->method('delete')
             ->with($food)
-            ->once()
-            ->andReturn(true);
+            ->willReturn(true);
 
         $result = $this->foodService->deleteFood($food);
 
@@ -167,10 +166,10 @@ class FoodServiceTest extends TestCase
             'user_id' => null,
         ]);
 
-        $this->foodRepository->shouldReceive('create')
+        $this->foodRepository->expects($this->once())
+            ->method('create')
             ->with($expectedData)
-            ->once()
-            ->andReturn(new Food($expectedData));
+            ->willReturn(new Food($expectedData));
 
         $result = $this->foodService->createGlobalFood($data);
 
@@ -180,7 +179,6 @@ class FoodServiceTest extends TestCase
 
     protected function tearDown(): void
     {
-        Mockery::close();
         parent::tearDown();
     }
 }

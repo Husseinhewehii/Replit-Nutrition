@@ -8,6 +8,7 @@ use App\Models\Food;
 use App\Models\Portion;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use OpenAI\Laravel\Facades\OpenAI;
 
 class PortionControllerTest extends TestCase
 {
@@ -166,5 +167,27 @@ class PortionControllerTest extends TestCase
         ]);
 
         $response->assertSessionHasErrors(['grams']);
+    }
+
+    public function test_quick_add_shows_user_friendly_error_when_ai_fails()
+    {
+        $user = User::factory()->create();
+
+        // Mock AI failure
+        OpenAI::fake([
+            new \Exception('API Error'),
+        ]);
+
+        $response = $this->actingAs($user)
+            ->from('/dashboard')
+            ->post('/portions/quick-add', [
+                'quick_add' => 'unknown_food-150',
+            ]);
+
+        $response->assertRedirect('/dashboard');
+        $response->assertSessionHasErrors(['quick_add']);
+        $response->assertSessionHas('errors', function ($errors) {
+            return $errors->first('quick_add') === 'Unable to find nutrition information for this food. Please try adding it manually.';
+        });
     }
 }

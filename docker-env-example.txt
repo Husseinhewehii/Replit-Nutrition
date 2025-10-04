@@ -75,5 +75,7 @@ AWS_USE_PATH_STYLE_ENDPOINT=false
 VITE_APP_NAME="${APP_NAME}"
 
 # OpenAI Configuration (for your AI features)
-OPENAI_API_KEY=your_openai_api_key_here
-OPENAI_ORGANIZATION=your_openai_organization_id_here
+# Get your API key from: https://platform.openai.com/account/api-keys
+OPENAI_API_KEY=sk-your_openai_api_key_here_replace_with_real_key
+# Leave empty if not part of an organization
+OPENAI_ORGANIZATION=

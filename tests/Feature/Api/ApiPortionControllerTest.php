@@ -9,6 +9,7 @@ use App\Models\Portion;
 use Laravel\Sanctum\Sanctum;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use OpenAI\Laravel\Facades\OpenAI;
 
 class ApiPortionControllerTest extends TestCase
 {
@@ -195,5 +196,25 @@ class ApiPortionControllerTest extends TestCase
 
         $response->assertStatus(403);
         $this->assertDatabaseHas('portions', ['id' => $portion->id]);
+    }
+
+    public function test_api_quick_add_returns_503_when_ai_fails()
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        // Mock AI failure
+        OpenAI::fake([
+            new \Exception('API Error'),
+        ]);
+
+        $response = $this->postJson('/api/portions/quick-add', [
+            'slug_grams' => 'unknown_food-150',
+        ]);
+
+        $response->assertStatus(503);
+        $response->assertJson([
+            'error' => 'Unable to find nutrition information for this food. Please try adding it manually.'
+        ]);
     }
 }

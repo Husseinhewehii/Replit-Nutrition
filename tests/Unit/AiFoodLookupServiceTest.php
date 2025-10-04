@@ -6,7 +6,6 @@ use Tests\TestCase;
 use App\Services\AiFoodLookupService;
 use App\Services\FoodService;
 use App\Models\Food;
-use Mockery;
 use OpenAI\Laravel\Facades\OpenAI;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 
@@ -20,7 +19,7 @@ class AiFoodLookupServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->foodService = Mockery::mock(FoodService::class);
+        $this->foodService = $this->createMock(FoodService::class);
         $this->aiLookupService = new AiFoodLookupService($this->foodService);
     }
 
@@ -32,10 +31,10 @@ class AiFoodLookupServiceTest extends TestCase
             'name' => 'Chicken Breast',
         ]);
 
-        $this->foodService->shouldReceive('findBySlug')
+        $this->foodService->expects($this->once())
+            ->method('findBySlug')
             ->with('chicken_breast', 1)
-            ->once()
-            ->andReturn($food);
+            ->willReturn($food);
 
         $result = $this->aiLookupService->findOrCreateFood('chicken_breast', 1);
 
@@ -45,10 +44,10 @@ class AiFoodLookupServiceTest extends TestCase
 
     public function test_find_or_create_food_returns_null_when_no_user_id_and_food_not_found()
     {
-        $this->foodService->shouldReceive('findBySlug')
+        $this->foodService->expects($this->once())
+            ->method('findBySlug')
             ->with('unknown_food', null)
-            ->once()
-            ->andReturn(null);
+            ->willReturn(null);
 
         $result = $this->aiLookupService->findOrCreateFood('unknown_food', null);
 
@@ -57,10 +56,10 @@ class AiFoodLookupServiceTest extends TestCase
 
     public function test_find_or_create_food_creates_food_from_ai_when_not_in_database()
     {
-        $this->foodService->shouldReceive('findBySlug')
+        $this->foodService->expects($this->once())
+            ->method('findBySlug')
             ->with('salmon', 1)
-            ->once()
-            ->andReturn(null);
+            ->willReturn(null);
 
         OpenAI::fake([
             \OpenAI\Responses\Chat\CreateResponse::fake([
@@ -91,10 +90,10 @@ class AiFoodLookupServiceTest extends TestCase
 
         $createdFood = new Food($aiFood);
 
-        $this->foodService->shouldReceive('createFood')
+        $this->foodService->expects($this->once())
+            ->method('createFood')
             ->with($aiFood, 1)
-            ->once()
-            ->andReturn($createdFood);
+            ->willReturn($createdFood);
 
         $result = $this->aiLookupService->findOrCreateFood('salmon', 1);
 
@@ -102,12 +101,12 @@ class AiFoodLookupServiceTest extends TestCase
         $this->assertEquals($createdFood, $result['food']);
     }
 
-    public function test_find_or_create_food_returns_null_when_ai_fails()
+    public function test_find_or_create_food_returns_error_when_ai_fails()
     {
-        $this->foodService->shouldReceive('findBySlug')
+        $this->foodService->expects($this->once())
+            ->method('findBySlug')
             ->with('invalid_food', 1)
-            ->once()
-            ->andReturn(null);
+            ->willReturn(null);
 
         OpenAI::fake([
             new \Exception('API Error'),
@@ -115,15 +114,17 @@ class AiFoodLookupServiceTest extends TestCase
 
         $result = $this->aiLookupService->findOrCreateFood('invalid_food', 1);
 
-        $this->assertNull($result);
+        $this->assertNotNull($result);
+        $this->assertEquals('ai_failure', $result['error_type']);
+        $this->assertEquals('AI service is currently unavailable. Please try again later.', $result['error']);
     }
 
     public function test_lookup_food_with_ai_handles_json_code_blocks()
     {
-        $this->foodService->shouldReceive('findBySlug')
+        $this->foodService->expects($this->once())
+            ->method('findBySlug')
             ->with('tuna', 1)
-            ->once()
-            ->andReturn(null);
+            ->willReturn(null);
 
         OpenAI::fake([
             \OpenAI\Responses\Chat\CreateResponse::fake([
@@ -154,19 +155,44 @@ class AiFoodLookupServiceTest extends TestCase
 
         $createdFood = new Food($aiFood);
 
-        $this->foodService->shouldReceive('createFood')
+        $this->foodService->expects($this->once())
+            ->method('createFood')
             ->with($aiFood, 1)
-            ->once()
-            ->andReturn($createdFood);
+            ->willReturn($createdFood);
 
         $result = $this->aiLookupService->findOrCreateFood('tuna', 1);
 
         $this->assertEquals('ai', $result['source']);
     }
 
+    public function test_find_or_create_food_returns_error_when_ai_returns_invalid_data()
+    {
+        $this->foodService->expects($this->once())
+            ->method('findBySlug')
+            ->with('invalid_food', 1)
+            ->willReturn(null);
+
+        OpenAI::fake([
+            \OpenAI\Responses\Chat\CreateResponse::fake([
+                'choices' => [
+                    [
+                        'message' => [
+                            'content' => 'Invalid JSON response',
+                        ],
+                    ],
+                ],
+            ]),
+        ]);
+
+        $result = $this->aiLookupService->findOrCreateFood('invalid_food', 1);
+
+        $this->assertNotNull($result);
+        $this->assertEquals('ai_failure', $result['error_type']);
+        $this->assertEquals('AI was unable to provide valid nutrition data for this food item.', $result['error']);
+    }
+
     protected function tearDown(): void
     {
-        Mockery::close();
         parent::tearDown();
     }
 }

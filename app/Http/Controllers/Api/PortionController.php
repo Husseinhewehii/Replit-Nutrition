@@ -85,6 +85,13 @@ class PortionController extends Controller
             ], 404);
         }
 
+        // Handle AI failure case
+        if (isset($result['error_type']) && $result['error_type'] === 'ai_failure') {
+            return response()->json([
+                'error' => 'Unable to find nutrition information for this food. Please try adding it manually.'
+            ], 503);
+        }
+
         $portion = $this->portionService->createPortion($request->user()->id, $result['food']->id, $grams);
 
         if (!$portion) {

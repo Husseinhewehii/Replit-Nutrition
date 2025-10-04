@@ -13,7 +13,7 @@ return [
     */
 
     'api_key' => env('OPENAI_API_KEY'),
-    'organization' => env('OPENAI_ORGANIZATION'),
+    'organization' => env('OPENAI_ORGANIZATION') ?: null,
 
     /*
     |--------------------------------------------------------------------------
@@ -24,7 +24,7 @@ return [
     | situations where you are using a legacy user API key and need association
     | with a project. This is not required for the newer API keys.
     */
-    'project' => env('OPENAI_PROJECT'),
+    'project' => env('OPENAI_PROJECT') ?: null,
 
     /*
     |--------------------------------------------------------------------------
