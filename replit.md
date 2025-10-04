@@ -9,7 +9,7 @@ Preferred communication style: Simple, everyday language.
 # System Architecture
 
 ## Backend Framework
-- **Framework**: Laravel 12.x running on PHP 8.2+
+- **Framework**: Laravel 12.x running on PHP 8.4+
 - **Authentication**: 
   - Web routes use session-based authentication (`web` guard) with CSRF protection
   - API routes use Laravel Sanctum personal access tokens for mutations

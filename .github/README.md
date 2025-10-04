@@ -4,39 +4,23 @@ This directory contains GitHub Actions workflows for the Laravel Nutrition app.
 
 ## Available Workflows
 
-### 1. Basic Project Check (`basic-check.yml`)
-**Simple workflow that checks:**
-- ✅ Project builds successfully
-- ✅ All tests pass
-- ✅ Application starts and responds
-
-**Triggers:** Push/PR to main/master branches
-
-### 2. Full CI/CD Pipeline (`ci.yml`)
-**Comprehensive workflow that includes:**
-- ✅ PHPUnit tests
-- ✅ Cypress E2E tests
-- ✅ Security audit
-- ✅ Code style check
-- ✅ Docker build test
+### Laravel CI - MVP (`laravel.yml`)
+**Simple workflow that serves as a merge gate:**
+- ✅ PHPUnit tests with SQLite
+- ✅ Frontend build test
 - ✅ Application startup test
 
-**Triggers:** Push/PR to main/master/develop branches
+**Triggers:** Push/PR to main/master branches
 
 ## Setup Instructions
 
 ### 1. Required Secrets
-Add these secrets to your GitHub repository:
-
-1. Go to your repository → Settings → Secrets and variables → Actions
-2. Add the following secret:
-   - `OPENAI_API_KEY`: Your OpenAI API key (for AI features testing)
+No secrets are required! The workflow uses mocked OpenAI services for testing.
 
 ### 2. Database Setup
-The workflows automatically set up:
-- MySQL 8.0 database
-- Redis cache (in full CI pipeline)
-- Test database with seeded data
+The workflow uses:
+- SQLite in-memory database (fast and simple)
+- No external database services needed
 
 ### 3. Environment Configuration
 The workflows use the `docker-env-example.txt` file as a template for environment variables.
@@ -48,7 +32,7 @@ The workflows use the `docker-env-example.txt` file as a template for environmen
 # Runs on: ubuntu-latest
 # Services: MySQL 8.0
 # Steps:
-1. Setup PHP 8.2 + Node.js 18
+1. Setup PHP 8.4 + Node.js 18
 2. Install dependencies
 3. Setup database
 4. Run tests

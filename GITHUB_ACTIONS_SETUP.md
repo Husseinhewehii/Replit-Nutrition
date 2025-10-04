@@ -1,25 +1,14 @@
 # GitHub Actions Setup Guide
 
-I've created GitHub Actions workflows to check if your project is running and tests are passing.
+I've created a comprehensive GitHub Actions workflow to serve as a merge gate for your Laravel Nutrition app.
 
 ## 📁 Files Created
 
-### Workflow Files
-1. **`.github/workflows/simple-check.yml`** - ⭐ **RECOMMENDED**
-   - Simple and fast
-   - Uses SQLite in-memory database
-   - Checks: Tests pass + App starts
-
-2. **`.github/workflows/basic-check.yml`** - Full database setup
-   - Uses MySQL service
-   - More realistic environment
-   - Checks: Tests pass + App starts
-
-3. **`.github/workflows/ci.yml`** - Complete CI/CD pipeline
-   - Includes Cypress E2E tests
-   - Security checks
-   - Docker build test
-   - Multiple parallel jobs
+### Workflow File
+**`.github/workflows/laravel.yml`** - **Laravel CI - MVP**
+- Simple CI pipeline in one file
+- Serves as a gate before merging
+- Includes: Tests, Build, App startup check
 
 ### Documentation
 - **`.github/README.md`** - Detailed workflow documentation
@@ -27,64 +16,46 @@ I've created GitHub Actions workflows to check if your project is running and te
 
 ## 🚀 Quick Setup
 
-### 1. Choose Your Workflow
-I recommend starting with **`simple-check.yml`** - it's fast and covers your requirements.
-
-### 2. Add Required Secret
-1. Go to your GitHub repository
-2. Settings → Secrets and variables → Actions
-3. Add secret: `OPENAI_API_KEY` with your actual API key
-
-### 3. Push to GitHub
+### 1. Push to GitHub
 ```bash
 git add .github/
-git commit -m "Add GitHub Actions workflows"
+git commit -m "Add Laravel CI merge gate workflow"
 git push
 ```
 
-## ✅ What Each Workflow Checks
+## ✅ What the Laravel CI MVP Checks
 
-### Simple Check (Recommended)
-- ✅ **Tests Pass**: Runs `php artisan test`
+### Single Test Job
+- ✅ **Tests Pass**: Runs `php artisan test` with SQLite
+- ✅ **Build Success**: Frontend assets build correctly
 - ✅ **App Starts**: Starts server and checks HTTP response
-- ✅ **Fast**: Uses SQLite in-memory database (~2-3 minutes)
-
-### Basic Check
-- ✅ **Tests Pass**: Runs `php artisan test` with MySQL
-- ✅ **App Starts**: Starts server and checks HTTP response
-- ✅ **Realistic**: Uses MySQL service (~3-5 minutes)
-
-### Full CI Pipeline
-- ✅ **Tests Pass**: PHPUnit + Cypress E2E tests
-- ✅ **App Starts**: Multiple startup tests
-- ✅ **Security**: Composer audit + code style
-- ✅ **Docker**: Build and container test
-- ✅ **Comprehensive**: (~8-12 minutes)
+- ✅ **Fast**: Uses SQLite in-memory database (no external services)
 
 ## 🎯 Your Requirements Met
 
-✅ **Project is running**: All workflows test application startup
-✅ **Tests are passing**: All workflows run the test suite
+✅ **Project is running**: Tests application startup
+✅ **Tests are passing**: Runs PHPUnit test suite
+✅ **Merge Gate**: Serves as a gate before merging to main/master
 
 ## 🔧 Customization
 
-### To use a different workflow:
-1. Delete the workflows you don't want
-2. Keep only the one you prefer
-3. Push to GitHub
-
-### To modify a workflow:
-1. Edit the `.yml` file
+### To modify the workflow:
+1. Edit `.github/workflows/laravel.yml`
 2. Commit and push
 3. GitHub will run the updated workflow
+
+### To add new checks:
+1. Add new jobs or steps to the workflow
+2. Update this documentation
+3. Test locally first
 
 ## 📊 Expected Results
 
 ### Success ✅
 ```
 ✅ Tests Pass: 112 tests, 311 assertions
-✅ App Starts: HTTP 200 response
 ✅ Build Success: Frontend assets built
+✅ App Starts: HTTP 200 response
 ```
 
 ### Failure ❌
@@ -100,6 +71,9 @@ Test the same checks locally:
 # Run tests
 docker compose exec app php artisan test
 
+# Build frontend
+npm run build
+
 # Test app startup
 docker compose exec app php artisan serve &
 curl http://localhost:8000
@@ -107,9 +81,7 @@ curl http://localhost:8000
 
 ## 📝 Next Steps
 
-1. **Choose your workflow** (I recommend `simple-check.yml`)
-2. **Add the OpenAI secret** to GitHub
-3. **Push to GitHub** to trigger the workflow
-4. **Check the Actions tab** to see results
+1. **Push to GitHub** to trigger the workflow
+2. **Check the Actions tab** to see results
 
-The workflow will run automatically on every push and pull request to your main/master branch!
+The workflow will run automatically on every push and pull request to your main/master branch, serving as a merge gate!
