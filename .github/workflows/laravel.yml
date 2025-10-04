@@ -45,10 +45,15 @@ jobs:
       env:
         DB_CONNECTION: sqlite
         DB_DATABASE: ":memory:"
-        OPENAI_API_KEY: dummy_key_for_testing
 
     - name: Build frontend assets
       run: npm run build
+
+    - name: Run migrations for startup test
+      run: php artisan migrate --force
+      env:
+        DB_CONNECTION: sqlite
+        DB_DATABASE: ":memory:"
 
     - name: Test application startup
       run: |
@@ -57,4 +62,7 @@ jobs:
         curl -f http://localhost:8000 || exit 1
         echo "✅ Application is running!"
         pkill -f "php artisan serve"
+      env:
+        DB_CONNECTION: sqlite
+        DB_DATABASE: ":memory:"
 
