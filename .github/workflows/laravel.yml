@@ -44,7 +44,7 @@ jobs:
       run: php artisan test
       env:
         DB_CONNECTION: sqlite
-        DB_DATABASE: :memory:
+        DB_DATABASE: ":memory:"
         OPENAI_API_KEY: dummy_key_for_testing
 
     - name: Build frontend assets
