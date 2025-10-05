@@ -18,31 +18,66 @@ class PortionController extends Controller
     public function quickAdd(QuickAddPortionRequest $request)
     {
         $input = $request->validated()['quick_add'];
+        
+        // Parse multiple food entries (comma or newline separated)
+        $lines = array_filter(array_map('trim', preg_split('/[\n\r,]+/', $input)));
+        
+        $results = [];
+        $errors = [];
+        $successCount = 0;
+        $aiCreatedCount = 0;
 
-        $parts = explode('-', $input);
-        $slug = $parts[0];
-        $grams = (float) $parts[1];
+        foreach ($lines as $line) {
+            $parts = explode('-', $line);
+            $slug = $parts[0];
+            $grams = (float) $parts[1];
 
-        $result = $this->aiFoodLookupService->findOrCreateFood($slug, $request->user()->id);
+            $result = $this->aiFoodLookupService->findOrCreateFood($slug, $request->user()->id);
 
-        if (!$result) {
-            return back()->withErrors(['quick_add' => 'Could not find or create food. Please try again.']);
+            if (!$result) {
+                $errors[] = "Could not find or create food: {$slug}";
+                continue;
+            }
+
+            // Handle AI failure case
+            if (isset($result['error_type']) && $result['error_type'] === 'ai_failure') {
+                $errors[] = "Unable to find nutrition information for: {$slug}";
+                continue;
+            }
+
+            $portion = $this->portionService->createPortion($request->user()->id, $result['food']->id, $grams);
+
+            if (!$portion) {
+                $errors[] = "You do not have access to food: {$slug}";
+                continue;
+            }
+
+            $successCount++;
+            if ($result['source'] === 'ai') {
+                $aiCreatedCount++;
+            }
+            
+            $results[] = [
+                'food' => $result['food']->name,
+                'grams' => $grams,
+                'source' => $result['source']
+            ];
         }
 
-        // Handle AI failure case
-        if (isset($result['error_type']) && $result['error_type'] === 'ai_failure') {
-            return back()->withErrors(['quick_add' => 'Unable to find nutrition information for this food. Please try adding it manually.']);
+        // Build response messages
+        if (!empty($errors)) {
+            $errorMessage = 'Some foods could not be added: ' . implode(', ', $errors);
+            if ($successCount > 0) {
+                $errorMessage .= " ({$successCount} foods were added successfully)";
+            }
+            return back()->withErrors(['quick_add' => $errorMessage]);
         }
 
-        $portion = $this->portionService->createPortion($request->user()->id, $result['food']->id, $grams);
-
-        if (!$portion) {
-            return back()->withErrors(['quick_add' => 'You do not have access to this food.']);
+        // Success message
+        $message = "Successfully added {$successCount} food" . ($successCount > 1 ? 's' : '') . "!";
+        if ($aiCreatedCount > 0) {
+            $message .= " {$aiCreatedCount} food" . ($aiCreatedCount > 1 ? 's were' : ' was') . " automatically created with AI.";
         }
-
-        $message = $result['source'] === 'ai' 
-            ? "Portion added! Food '{$result['food']->name}' was automatically created with AI."
-            : 'Portion added successfully!';
 
         return back()->with('success', $message);
     }

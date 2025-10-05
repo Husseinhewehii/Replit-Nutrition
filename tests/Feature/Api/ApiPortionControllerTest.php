@@ -212,9 +212,208 @@ class ApiPortionControllerTest extends TestCase
             'slug_grams' => 'unknown_food-150',
         ]);
 
-        $response->assertStatus(503);
-        $response->assertJson([
-            'error' => 'Unable to find nutrition information for this food. Please try adding it manually.'
+        $response->assertStatus(207); // Multi-Status for partial failures
+        $response->assertJsonStructure([
+            'results',
+            'summary' => ['total', 'successful', 'failed', 'ai_created'],
+            'errors',
+            'message'
         ]);
+        $response->assertJson([
+            'summary' => [
+                'total' => 1,
+                'successful' => 0,
+                'failed' => 1,
+                'ai_created' => 0
+            ]
+        ]);
+    }
+
+    public function test_api_can_quick_add_multiple_foods_comma_separated()
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $food1 = Food::create([
+            'name' => 'Chicken Breast',
+            'slug' => 'chicken_breast',
+            'kcal_per_100g' => 165,
+            'protein_per_100g' => 31,
+            'carbs_per_100g' => 0,
+            'fat_per_100g' => 3.6,
+            'is_global' => true,
+        ]);
+
+        $food2 = Food::create([
+            'name' => 'Rice',
+            'slug' => 'rice',
+            'kcal_per_100g' => 130,
+            'protein_per_100g' => 2.7,
+            'carbs_per_100g' => 28,
+            'fat_per_100g' => 0.3,
+            'is_global' => true,
+        ]);
+
+        $response = $this->postJson('/api/portions/quick-add', [
+            'slug_grams' => 'chicken_breast-150, rice-200',
+        ]);
+
+        $response->assertStatus(201);
+        $response->assertJsonStructure([
+            'results' => [
+                '*' => ['portion', 'food', 'grams', 'source']
+            ],
+            'summary' => ['total', 'successful', 'failed', 'ai_created'],
+            'message'
+        ]);
+
+        $response->assertJson([
+            'summary' => [
+                'total' => 2,
+                'successful' => 2,
+                'failed' => 0,
+                'ai_created' => 0
+            ]
+        ]);
+
+        $this->assertDatabaseHas('portions', [
+            'user_id' => $user->id,
+            'food_id' => $food1->id,
+            'grams' => 150,
+        ]);
+
+        $this->assertDatabaseHas('portions', [
+            'user_id' => $user->id,
+            'food_id' => $food2->id,
+            'grams' => 200,
+        ]);
+    }
+
+    public function test_api_can_quick_add_multiple_foods_newline_separated()
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $food1 = Food::create([
+            'name' => 'Apple',
+            'slug' => 'apple',
+            'kcal_per_100g' => 52,
+            'protein_per_100g' => 0.3,
+            'carbs_per_100g' => 14,
+            'fat_per_100g' => 0.2,
+            'is_global' => true,
+        ]);
+
+        $food2 = Food::create([
+            'name' => 'Banana',
+            'slug' => 'banana',
+            'kcal_per_100g' => 89,
+            'protein_per_100g' => 1.1,
+            'carbs_per_100g' => 23,
+            'fat_per_100g' => 0.3,
+            'is_global' => true,
+        ]);
+
+        $response = $this->postJson('/api/portions/quick-add', [
+            'slug_grams' => "apple-100\nbanana-120",
+        ]);
+
+        $response->assertStatus(201);
+        $response->assertJson([
+            'summary' => [
+                'total' => 2,
+                'successful' => 2,
+                'failed' => 0,
+                'ai_created' => 0
+            ]
+        ]);
+
+        $this->assertDatabaseHas('portions', [
+            'user_id' => $user->id,
+            'food_id' => $food1->id,
+            'grams' => 100,
+        ]);
+
+        $this->assertDatabaseHas('portions', [
+            'user_id' => $user->id,
+            'food_id' => $food2->id,
+            'grams' => 120,
+        ]);
+    }
+
+    public function test_api_quick_add_multiple_foods_handles_partial_failures()
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $food1 = Food::create([
+            'name' => 'Chicken Breast',
+            'slug' => 'chicken_breast',
+            'kcal_per_100g' => 165,
+            'protein_per_100g' => 31,
+            'carbs_per_100g' => 0,
+            'fat_per_100g' => 3.6,
+            'is_global' => true,
+        ]);
+
+        // Mock AI failure for the second food
+        OpenAI::fake([
+            new \Exception('API Error'),
+        ]);
+
+        $response = $this->postJson('/api/portions/quick-add', [
+            'slug_grams' => 'chicken_breast-150, unknown_food-200',
+        ]);
+
+        $response->assertStatus(207); // Multi-Status
+        $response->assertJsonStructure([
+            'results',
+            'summary' => ['total', 'successful', 'failed', 'ai_created'],
+            'errors',
+            'message'
+        ]);
+
+        $response->assertJson([
+            'summary' => [
+                'total' => 2,
+                'successful' => 1,
+                'failed' => 1,
+                'ai_created' => 0
+            ]
+        ]);
+
+        // Should still add the successful food
+        $this->assertDatabaseHas('portions', [
+            'user_id' => $user->id,
+            'food_id' => $food1->id,
+            'grams' => 150,
+        ]);
+    }
+
+    public function test_api_quick_add_multiple_foods_validation_errors()
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/portions/quick-add', [
+            'slug_grams' => 'chicken_breast-150, invalid-format-here',
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonStructure(['error']);
+        $response->assertJsonFragment(['error' => "Invalid format: 'invalid-format-here'. Use: slug-grams (e.g., chicken_breast-150)"]);
+    }
+
+    public function test_api_quick_add_multiple_foods_empty_input()
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $response = $this->postJson('/api/portions/quick-add', [
+            'slug_grams' => '',
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonStructure(['message', 'errors']);
     }
 }

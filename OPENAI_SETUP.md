@@ -44,13 +44,25 @@ docker compose exec app php artisan openai:test
 
 Once configured, you can use AI features:
 
+### Single Food
 1. **Quick Add Food**: Go to dashboard and use format like `salmon-200`
 2. **API Usage**: POST to `/api/portions/quick-add` with `{"slug_grams": "salmon-200"}`
 
+### Multiple Foods
+1. **Comma-separated**: `salmon-200, rice-150, apple-100`
+2. **Newline-separated**: 
+   ```
+   salmon-200
+   rice-150
+   apple-100
+   ```
+3. **API Usage**: POST to `/api/portions/quick-add` with `{"slug_grams": "salmon-200, rice-150, apple-100"}`
+
 The AI will automatically:
-- Look up nutrition information for the food
-- Create a new food entry in your database
-- Add the portion to your daily intake
+- Look up nutrition information for unknown foods
+- Create new food entries in your database
+- Add all portions to your daily intake
+- Handle partial failures gracefully (some foods succeed, others fail)
 
 ## 5. Troubleshooting
 
