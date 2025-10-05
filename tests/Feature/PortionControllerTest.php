@@ -187,7 +187,170 @@ class PortionControllerTest extends TestCase
         $response->assertRedirect('/dashboard');
         $response->assertSessionHasErrors(['quick_add']);
         $response->assertSessionHas('errors', function ($errors) {
-            return $errors->first('quick_add') === 'Unable to find nutrition information for this food. Please try adding it manually.';
+            return str_contains($errors->first('quick_add'), 'Unable to find nutrition information for: unknown_food');
         });
+    }
+
+    public function test_can_quick_add_multiple_foods_comma_separated()
+    {
+        $user = User::factory()->create();
+        
+        $food1 = Food::create([
+            'name' => 'Chicken Breast',
+            'slug' => 'chicken_breast',
+            'kcal_per_100g' => 165,
+            'protein_per_100g' => 31,
+            'carbs_per_100g' => 0,
+            'fat_per_100g' => 3.6,
+            'is_global' => true,
+        ]);
+
+        $food2 = Food::create([
+            'name' => 'Rice',
+            'slug' => 'rice',
+            'kcal_per_100g' => 130,
+            'protein_per_100g' => 2.7,
+            'carbs_per_100g' => 28,
+            'fat_per_100g' => 0.3,
+            'is_global' => true,
+        ]);
+
+        $response = $this->actingAs($user)
+            ->from('/dashboard')
+            ->post('/portions/quick-add', [
+                'quick_add' => 'chicken_breast-150, rice-200',
+            ]);
+
+        $response->assertRedirect('/dashboard');
+        $response->assertSessionHas('success', 'Successfully added 2 foods!');
+        
+        $this->assertDatabaseHas('portions', [
+            'user_id' => $user->id,
+            'food_id' => $food1->id,
+            'grams' => 150,
+        ]);
+        
+        $this->assertDatabaseHas('portions', [
+            'user_id' => $user->id,
+            'food_id' => $food2->id,
+            'grams' => 200,
+        ]);
+    }
+
+    public function test_can_quick_add_multiple_foods_newline_separated()
+    {
+        $user = User::factory()->create();
+        
+        $food1 = Food::create([
+            'name' => 'Apple',
+            'slug' => 'apple',
+            'kcal_per_100g' => 52,
+            'protein_per_100g' => 0.3,
+            'carbs_per_100g' => 14,
+            'fat_per_100g' => 0.2,
+            'is_global' => true,
+        ]);
+
+        $food2 = Food::create([
+            'name' => 'Banana',
+            'slug' => 'banana',
+            'kcal_per_100g' => 89,
+            'protein_per_100g' => 1.1,
+            'carbs_per_100g' => 23,
+            'fat_per_100g' => 0.3,
+            'is_global' => true,
+        ]);
+
+        $response = $this->actingAs($user)
+            ->from('/dashboard')
+            ->post('/portions/quick-add', [
+                'quick_add' => "apple-100\nbanana-120",
+            ]);
+
+        $response->assertRedirect('/dashboard');
+        $response->assertSessionHas('success', 'Successfully added 2 foods!');
+        
+        $this->assertDatabaseHas('portions', [
+            'user_id' => $user->id,
+            'food_id' => $food1->id,
+            'grams' => 100,
+        ]);
+        
+        $this->assertDatabaseHas('portions', [
+            'user_id' => $user->id,
+            'food_id' => $food2->id,
+            'grams' => 120,
+        ]);
+    }
+
+    public function test_quick_add_multiple_foods_handles_partial_failures()
+    {
+        $user = User::factory()->create();
+        
+        $food1 = Food::create([
+            'name' => 'Chicken Breast',
+            'slug' => 'chicken_breast',
+            'kcal_per_100g' => 165,
+            'protein_per_100g' => 31,
+            'carbs_per_100g' => 0,
+            'fat_per_100g' => 3.6,
+            'is_global' => true,
+        ]);
+
+        // Mock AI failure for the second food
+        OpenAI::fake([
+            new \Exception('API Error'),
+        ]);
+
+        $response = $this->actingAs($user)
+            ->from('/dashboard')
+            ->post('/portions/quick-add', [
+                'quick_add' => 'chicken_breast-150, unknown_food-200',
+            ]);
+
+        $response->assertRedirect('/dashboard');
+        $response->assertSessionHasErrors(['quick_add']);
+        $response->assertSessionHas('errors', function ($errors) {
+            return str_contains($errors->first('quick_add'), 'Some foods could not be added') &&
+                   str_contains($errors->first('quick_add'), '1 foods were added successfully');
+        });
+        
+        // Should still add the successful food
+        $this->assertDatabaseHas('portions', [
+            'user_id' => $user->id,
+            'food_id' => $food1->id,
+            'grams' => 150,
+        ]);
+    }
+
+    public function test_quick_add_multiple_foods_validation_errors()
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)
+            ->from('/dashboard')
+            ->post('/portions/quick-add', [
+                'quick_add' => 'chicken_breast-150, invalid-format-here',
+            ]);
+
+        $response->assertRedirect('/dashboard');
+        $response->assertSessionHasErrors(['quick_add']);
+        $response->assertSessionHas('errors', function ($errors) {
+            return str_contains($errors->first('quick_add'), 'Invalid format');
+        });
+    }
+
+    public function test_quick_add_multiple_foods_empty_input()
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)
+            ->from('/dashboard')
+            ->post('/portions/quick-add', [
+                'quick_add' => '',
+            ]);
+
+        $response->assertRedirect('/dashboard');
+        $response->assertSessionHasErrors(['quick_add']);
     }
 }

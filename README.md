@@ -25,11 +25,13 @@ This nutrition app was built for testing purposes to demonstrate how AI can be l
 - **Smart UI**: Current day highlighted with blue styling, older days collapsible
 - **Nutrition Stats**: Real-time calculation of calories, protein, carbs, and fat
 - **Food Database**: Local database with common foods and their nutritional values
+- **Quick Add**: Add single or multiple foods at once using simple format (`food_slug-grams`)
 
 ### 🤖 AI-Powered Food Lookup
 - **Intelligent Search**: When foods aren't found locally, AI searches for nutrition facts
 - **OpenAI Integration**: Leverages AI to find accurate nutritional information
 - **Seamless Experience**: Automatic fallback from local DB to AI lookup
+- **Batch Processing**: Add multiple foods simultaneously with AI lookup for unknown items
 
 ### 🧪 Comprehensive Testing
 - **Cypress E2E Tests**: Full browser automation testing
@@ -116,6 +118,10 @@ This nutrition app was built for testing purposes to demonstrate how AI can be l
 - ✅ Interactive toggle behavior
 - ✅ Authentication flow
 - ✅ Responsive design
+- ✅ Quick Add single food functionality
+- ✅ Quick Add multiple foods (comma and newline separated)
+- ✅ Partial failure handling in batch operations
+- ✅ AI integration and error handling
 
 ## 📁 Project Structure
 
@@ -135,7 +141,11 @@ This nutrition app was built for testing purposes to demonstrate how AI can be l
 ├── public/
 │   ├── css/               # Stylesheets
 │   └── js/                # JavaScript files
-└── resources/views/       # Blade templates
+├── resources/views/       # Blade templates
+├── README.md              # Main project documentation
+├── QUICK_ADD_GUIDE.md     # Detailed Quick Add feature guide
+├── OPENAI_SETUP.md        # OpenAI configuration guide
+└── .github/workflows/     # CI/CD workflows
 ```
 
 ## 🤖 AI Integration
@@ -153,6 +163,31 @@ The app demonstrates practical AI integration by:
 $aiService = new AiFoodLookupService();
 $nutritionData = $aiService->lookupFood('quinoa salad');
 ```
+
+## 🚀 Quick Add Feature
+
+The Quick Add feature allows you to add food portions using a simple text format, supporting both single and multiple food entries.
+
+### Quick Examples
+
+**Single Food:**
+```
+chicken_breast-150
+```
+
+**Multiple Foods:**
+```
+chicken_breast-150, rice-200, apple-100
+```
+
+### Key Features
+- ✅ **Batch Processing**: Add multiple foods in one operation
+- ✅ **Smart Error Handling**: Partial failures don't stop successful additions
+- ✅ **AI Integration**: Unknown foods are automatically looked up via AI
+- ✅ **Flexible Input**: Supports both comma and newline separation
+
+### 📖 Complete Guide
+For detailed usage instructions, examples, and troubleshooting, see the **[Quick Add Guide](QUICK_ADD_GUIDE.md)**.
 
 ## 🎨 UI/UX Highlights
 
@@ -173,10 +208,12 @@ $nutritionData = $aiService->lookupFood('quinoa salad');
 
 ## 📊 Key Metrics
 
-- **Test Coverage**: 6 comprehensive E2E test scenarios
+- **Test Coverage**: 122 comprehensive tests (385 assertions) including E2E and unit tests
 - **Performance**: Optimized database queries and caching
 - **Accessibility**: WCAG compliant design patterns
 - **Responsiveness**: Mobile-first design approach
+- **API Endpoints**: Full REST API with batch processing capabilities
+- **AI Integration**: Seamless fallback from local DB to AI lookup
 
 ## 🤝 Contributing
 
