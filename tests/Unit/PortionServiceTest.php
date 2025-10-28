@@ -129,16 +129,20 @@ class PortionServiceTest extends TestCase
         $this->assertTrue($this->portionService->isValidSlugGramsFormat('chicken_breast-150'));
         $this->assertTrue($this->portionService->isValidSlugGramsFormat('rice-200'));
         $this->assertTrue($this->portionService->isValidSlugGramsFormat('egg_white-50'));
+        $this->assertTrue($this->portionService->isValidSlugGramsFormat('Chicken_Breast-150'));
+        $this->assertTrue($this->portionService->isValidSlugGramsFormat('RICE-200'));
+        $this->assertTrue($this->portionService->isValidSlugGramsFormat('Mixed_Case_Food-75.5'));
     }
 
     public function test_is_valid_slug_grams_format_with_invalid_input()
     {
         $this->assertFalse($this->portionService->isValidSlugGramsFormat('no-dash'));
-        $this->assertFalse($this->portionService->isValidSlugGramsFormat('Invalid_Slug-150'));
-        $this->assertFalse($this->portionService->isValidSlugGramsFormat('chicken-breast-150'));
+        $this->assertFalse($this->portionService->isValidSlugGramsFormat('invalid slug-150')); // Space in slug
+        $this->assertFalse($this->portionService->isValidSlugGramsFormat('chicken-breast-150')); // Multiple dashes
         $this->assertFalse($this->portionService->isValidSlugGramsFormat('rice-0'));
         $this->assertFalse($this->portionService->isValidSlugGramsFormat('rice--50'));
         $this->assertFalse($this->portionService->isValidSlugGramsFormat('rice-abc'));
+        $this->assertFalse($this->portionService->isValidSlugGramsFormat('food@special-100')); // Special char
     }
 
     public function test_create_portion_from_slug_grams_success()

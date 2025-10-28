@@ -23,8 +23,8 @@ class QuickAddPortionRequest extends FormRequest
                 }
                 
                 foreach ($lines as $line) {
-                    if (!preg_match('/^[a-z0-9_]+-\d+(\.\d+)?$/', $line)) {
-                        $fail("Invalid format: '{$line}'. Use: slug-grams (e.g., chicken_breast-150)");
+                    if (!preg_match('/^[a-zA-Z0-9_]+-\d+(\.\d+)?$/i', $line)) {
+                        $fail("Invalid format: '{$line}'. Use: slug-grams (e.g., chicken_breast-150 or Chicken_Breast-150)");
                         return;
                     }
                 }

@@ -72,7 +72,7 @@ class PortionService
         $slug = $parts[0];
         $grams = $parts[1];
 
-        if (!preg_match('/^[a-z0-9_]+$/', $slug)) {
+        if (!preg_match('/^[a-zA-Z0-9_]+$/i', $slug)) {
             return false;
         }
 
