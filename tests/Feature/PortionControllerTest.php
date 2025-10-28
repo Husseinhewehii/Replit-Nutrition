@@ -353,4 +353,81 @@ class PortionControllerTest extends TestCase
         $response->assertRedirect('/dashboard');
         $response->assertSessionHasErrors(['quick_add']);
     }
+
+    public function test_quick_add_accepts_uppercase_slugs()
+    {
+        $user = User::factory()->create();
+        
+        $food = Food::create([
+            'name' => 'Chicken Breast',
+            'slug' => 'chicken_breast',
+            'kcal_per_100g' => 165,
+            'protein_per_100g' => 31,
+            'carbs_per_100g' => 0,
+            'fat_per_100g' => 3.6,
+            'is_global' => true,
+        ]);
+
+        $response = $this->actingAs($user)
+            ->from('/dashboard')
+            ->post('/portions/quick-add', [
+                'quick_add' => 'Chicken_Breast-150',
+            ]);
+
+        $response->assertRedirect('/dashboard');
+        $response->assertSessionHas('success');
+        
+        $this->assertDatabaseHas('portions', [
+            'user_id' => $user->id,
+            'food_id' => $food->id,
+            'grams' => 150,
+        ]);
+    }
+
+    public function test_quick_add_multiple_foods_with_mixed_case()
+    {
+        $user = User::factory()->create();
+        
+        $food1 = Food::create([
+            'name' => 'Chicken Breast',
+            'slug' => 'chicken_breast',
+            'kcal_per_100g' => 165,
+            'protein_per_100g' => 31,
+            'carbs_per_100g' => 0,
+            'fat_per_100g' => 3.6,
+            'is_global' => true,
+        ]);
+
+        $food2 = Food::create([
+            'name' => 'Rice',
+            'slug' => 'rice',
+            'kcal_per_100g' => 130,
+            'protein_per_100g' => 2.7,
+            'carbs_per_100g' => 28,
+            'fat_per_100g' => 0.3,
+            'is_global' => true,
+        ]);
+
+        $response = $this->actingAs($user)
+            ->from('/dashboard')
+            ->post('/portions/quick-add', [
+                'quick_add' => 'Chicken_Breast-150, RICE-200',
+            ]);
+
+        $response->assertRedirect('/dashboard');
+        $response->assertSessionHas('success', 'Successfully added 2 foods!');
+        
+        $this->assertDatabaseHas('portions', [
+            'user_id' => $user->id,
+            'food_id' => $food1->id,
+            'grams' => 150,
+        ]);
+        
+        $this->assertDatabaseHas('portions', [
+            'user_id' => $user->id,
+            'food_id' => $food2->id,
+            'grams' => 200,
+        ]);
+    }
 }
+

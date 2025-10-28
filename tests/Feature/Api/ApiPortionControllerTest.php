@@ -401,7 +401,7 @@ class ApiPortionControllerTest extends TestCase
 
         $response->assertStatus(422);
         $response->assertJsonStructure(['error']);
-        $response->assertJsonFragment(['error' => "Invalid format: 'invalid-format-here'. Use: slug-grams (e.g., chicken_breast-150)"]);
+        $response->assertJsonFragment(['error' => "Invalid format: 'invalid-format-here'. Use: slug-grams (e.g., chicken_breast-150 or Chicken_Breast-150)"]);
     }
 
     public function test_api_quick_add_multiple_foods_empty_input()
@@ -416,4 +416,84 @@ class ApiPortionControllerTest extends TestCase
         $response->assertStatus(422);
         $response->assertJsonStructure(['message', 'errors']);
     }
+
+    public function test_api_quick_add_accepts_uppercase_slugs()
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $food = Food::create([
+            'name' => 'Chicken Breast',
+            'slug' => 'chicken_breast',
+            'kcal_per_100g' => 165,
+            'protein_per_100g' => 31,
+            'carbs_per_100g' => 0,
+            'fat_per_100g' => 3.6,
+            'is_global' => true,
+        ]);
+
+        $response = $this->postJson('/api/portions/quick-add', [
+            'slug_grams' => 'Chicken_Breast-150',
+        ]);
+
+        $response->assertStatus(201);
+        $this->assertDatabaseHas('portions', [
+            'user_id' => $user->id,
+            'food_id' => $food->id,
+            'grams' => 150,
+        ]);
+    }
+
+    public function test_api_quick_add_multiple_foods_with_mixed_case()
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $food1 = Food::create([
+            'name' => 'Chicken Breast',
+            'slug' => 'chicken_breast',
+            'kcal_per_100g' => 165,
+            'protein_per_100g' => 31,
+            'carbs_per_100g' => 0,
+            'fat_per_100g' => 3.6,
+            'is_global' => true,
+        ]);
+
+        $food2 = Food::create([
+            'name' => 'Rice',
+            'slug' => 'rice',
+            'kcal_per_100g' => 130,
+            'protein_per_100g' => 2.7,
+            'carbs_per_100g' => 28,
+            'fat_per_100g' => 0.3,
+            'is_global' => true,
+        ]);
+
+        $response = $this->postJson('/api/portions/quick-add', [
+            'slug_grams' => 'Chicken_Breast-150, RICE-200',
+        ]);
+
+        $response->assertStatus(201);
+        $response->assertJson([
+            'summary' => [
+                'total' => 2,
+                'successful' => 2,
+                'failed' => 0,
+                'ai_created' => 0
+            ]
+        ]);
+
+        $this->assertDatabaseHas('portions', [
+            'user_id' => $user->id,
+            'food_id' => $food1->id,
+            'grams' => 150,
+        ]);
+
+        $this->assertDatabaseHas('portions', [
+            'user_id' => $user->id,
+            'food_id' => $food2->id,
+            'grams' => 200,
+        ]);
+    }
 }
+

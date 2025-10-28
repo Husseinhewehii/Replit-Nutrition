@@ -80,7 +80,7 @@ class PortionController extends Controller
         foreach ($lines as $line) {
             if (!$this->portionService->isValidSlugGramsFormat($line)) {
                 return response()->json([
-                    'error' => "Invalid format: '{$line}'. Use: slug-grams (e.g., chicken_breast-150)"
+                    'error' => "Invalid format: '{$line}'. Use: slug-grams (e.g., chicken_breast-150 or Chicken_Breast-150)"
                 ], 422);
             }
         }
@@ -92,7 +92,7 @@ class PortionController extends Controller
 
         foreach ($lines as $line) {
             $parts = explode('-', $line);
-            $slug = $parts[0];
+            $slug = strtolower($parts[0]); // Convert to lowercase for database lookup
             $grams = (float) $parts[1];
 
             $result = $this->aiFoodLookupService->findOrCreateFood($slug, $request->user()->id);
